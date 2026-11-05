@@ -1,5 +1,7 @@
 # Health Claim Copilot
 
+[![CI](https://github.com/siddhidokania/health-claim-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/siddhidokania/health-claim-copilot/actions/workflows/ci.yml)
+
 Health insurance claims in India often fail for reasons buried in a long policy document. This app reads your policy and explains it in plain language, with every answer linked to the exact clause and page.
 
 ## What it does
@@ -29,7 +31,9 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Add your key and model to `.env`, then open http://localhost:8000. Without them, the app only shows the most relevant passages.
+Add your key to `.env`, then open http://localhost:8000. Without a key, the app only shows the most relevant passages. To try it, upload `data/sample/sample-policy.txt`, a fictional policy. The first upload takes longer because the search models are downloaded.
+
+Free AI tiers have daily request limits. If you reach one, wait until it resets or change `LLM_MODEL` in `.env`.
 
 Use Gemini's free tier only with public documents, because free-tier content may be used by Google. For real documents, use Ollama so nothing leaves your computer.
 
