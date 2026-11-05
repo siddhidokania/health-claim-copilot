@@ -37,10 +37,6 @@ def _services_up() -> bool:
 SERVICES = _services_up()
 
 
-def pytest_configure(config):
-    config.addinivalue_line("markers", "integration: needs PostgreSQL with pgvector and Redis")
-
-
 def pytest_collection_modifyitems(items):
     if SERVICES:
         return
