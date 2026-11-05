@@ -1,0 +1,12 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+python-multipart==0.0.20
+psycopg[binary]==3.2.9
+psycopg-pool==3.2.6
+pgvector==0.4.1
+redis==5.2.1
+pypdf==5.6.0
+fastembed==0.7.1
+prometheus-client==0.22.1
+numpy
+httpx==0.28.1

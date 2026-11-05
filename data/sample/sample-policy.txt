@@ -1,0 +1,31 @@
+Sample Health Shield Policy Wording (fictional, for testing only)
+
+Policy Schedule
+Patient Name: Asha Verma
+Policy No: SHS/2025/778899
+Mobile 9876543210, email asha.verma@example.com
+
+Section 1. Definitions
+Pre-existing disease means any condition, ailment or injury diagnosed within 36 months before the first policy start date.
+Reimbursement means the insured pays the hospital first and then claims the amount from the insurer.
+
+Section 2. Waiting Periods
+2.1 Initial waiting period. No claim is payable for any illness in the first 30 days from the first policy start date, except for accidents.
+2.2 Specified illness waiting period. Treatment for cataract, hernia, kidney stones and joint replacement is not payable in the first 24 months.
+2.3 Pre-existing disease waiting period. Pre-existing diseases are covered only after 36 months of continuous coverage.
+
+Section 3. Room Rent
+Room rent is limited to 1% of the sum insured per day. If a higher category room is chosen, all associated medical expenses are reduced in the same proportion.
+
+Section 4. Exclusions
+4.1 Cosmetic surgery is not covered unless needed after an accident.
+4.2 Treatment outside India is not covered.
+4.3 Hospitalisation for less than 24 hours is not covered, except for listed day care procedures.
+
+Section 5. Claim Procedure
+5.1 Intimation. The insured must inform the insurer within 48 hours of an emergency admission, or at least 72 hours before a planned admission.
+5.2 Reimbursement documents. Submit the claim form, original bills, discharge summary, investigation reports and payment receipts within 30 days of discharge.
+5.3 Condonation. A delay in submitting documents may be condoned if the insured shows it was due to genuine hardship.
+
+Section 6. Grievances
+Write to the Grievance Officer at the address on your policy schedule. If the matter is not resolved, the insured may approach the Insurance Ombudsman.

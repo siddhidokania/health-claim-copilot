@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Health Claim Copilot</title>
+<style>
+:root{--bg:#f6f7f8;--card:#fff;--ink:#1c2024;--muted:#5c6570;--line:#dde1e6;--accent:#0f6b5c;--accent-ink:#fff;--warn:#8a5a00}
+@media (prefers-color-scheme:dark){:root{--bg:#121518;--card:#1b1f24;--ink:#e8ebee;--muted:#a2abb5;--line:#32383f;--accent:#62cdb7;--accent-ink:#08221d;--warn:#e7b65c}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI",system-ui,Arial,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px}h1{font-size:20px;margin:0}header p{margin:2px 0 0;color:var(--muted)}
+main{max-width:860px;margin:0 auto;padding:18px 16px 60px}.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:14px}
+h2{font-size:17px;margin:0 0 8px}label{display:block;font-size:13px;font-weight:600;margin:10px 0 3px}
+input,textarea,select{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto;margin-right:6px}textarea{min-height:84px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 14px}
+button{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 12px;font:inherit;cursor:pointer}
+button.p{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}button:disabled{opacity:.6;cursor:default}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.muted{color:var(--muted)}.warn{color:var(--warn)}.doc{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;flex-wrap:wrap}
+.answer{white-space:pre-wrap;margin-top:12px}.cite{border:0;background:none;color:var(--accent);padding:0 2px;font-weight:600;text-decoration:underline}
+blockquote{margin:10px 0 0;padding:8px 12px;border-left:3px solid var(--accent);background:var(--bg);white-space:pre-wrap}nav{display:flex;gap:8px;margin-bottom:12px}
+</style></head><body>
+<header><h1>Health Claim Copilot</h1><p>Understand your health insurance policy and a refused claim, in plain language.</p></header>
+<main>
+<div class="card"><h2>1. Add your policy</h2><p class="muted">Upload the policy wording PDF. Names, phone numbers and similar details are removed where possible before text is sent for an answer, so still avoid uploading what you do not need to.</p>
+<input type="file" id="file" accept=".pdf,.txt"><div id="docs"></div></div>
+<nav><button id="tab-ask" class="p">Ask about the policy</button><button id="tab-review">Review a refused claim</button></nav>
+<div class="card" id="ask"><h2>2. Ask a question</h2><textarea id="q" placeholder="For example: what is the waiting period for a planned surgery?"></textarea>
+<div class="row" style="margin-top:8px"><button class="p" id="send">Ask</button></div></div>
+<div class="card" id="review" hidden><h2>2. Tell us about the claim</h2><div class="grid">
+<div><label for="type">Claim type</label><select id="type"><option value="reimbursement">Reimbursement</option><option value="cashless">Cashless</option></select></div>
+<div><label for="amount">Amount claimed</label><input id="amount"></div><div><label for="start">Policy start date</label><input id="start"></div><div><label for="date">Treatment date</label><input id="date"></div></div>
+<label for="treat">Treatment or illness</label><input id="treat"><label for="reason">Reason the insurer gave (leave out names and numbers)</label><textarea id="reason"></textarea>
+<label for="sent">Documents you already sent</label><input id="sent"><div class="row" style="margin-top:8px"><button class="p" id="go">Review claim</button></div></div>
+<div class="card" id="out" hidden><h2>Result</h2><p class="muted">General guidance from your policy text, not legal, medical or financial advice. Check every clause yourself. For a decision, talk to the insurer or a qualified adviser.</p>
+<div id="status" class="muted"></div><div id="answer" class="answer"></div><div id="quote"></div></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);let docs=[],sources={},text="";
+async function loadDocs(){docs=await (await fetch("/api/documents")).json();const box=$("docs");box.replaceChildren(...docs.map(d=>{const row=document.createElement("div");row.className="doc";
+ const label=document.createElement("label");label.style.margin=0;label.style.fontWeight=400;const c=document.createElement("input");c.type="checkbox";c.checked=true;c.dataset.id=d.id;c.disabled=d.status!=="ready";
+ label.append(c,`${d.title} (${d.status==="ready"?d.pages+" pages":d.status==="failed"?"could not be read":"reading..."})`);const del=document.createElement("button");del.textContent="Delete";
+ del.onclick=async()=>{await fetch("/api/documents/"+d.id,{method:"DELETE"});loadDocs()};row.append(label,del);return row}));
+ if(docs.some(d=>!["ready","failed"].includes(d.status)))setTimeout(loadDocs,3000)}
+const chosen=()=>[...document.querySelectorAll("#docs input:checked")].map(c=>+c.dataset.id);
+$("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;const body=new FormData();body.append("file",f);const r=await fetch("/api/documents?title="+encodeURIComponent(f.name.replace(/\.[^.]+$/,"")),{method:"POST",body});if(!r.ok)alert((await r.json()).detail||"Upload failed");e.target.value="";loadDocs()};
+function showAnswer(){const box=$("answer");box.replaceChildren();let last=0;for(const m of text.matchAll(/\[S(\d+)\]/g)){box.append(text.slice(last,m.index));last=m.index+m[0].length;const s=sources[m[1]];
+ if(s){const b=document.createElement("button");b.className="cite";b.textContent=`[${s.title}, p${s.page}]`;b.onclick=()=>{const q=document.createElement("blockquote");q.textContent=`${s.title}, page ${s.page}\n\n${s.content}`;$("quote").replaceChildren(q)};box.append(b)}}box.append(text.slice(last))}
+async function stream(url,payload){if(!chosen().length){alert("Add a policy and wait until it is ready.");return}sources={};text="";$("out").hidden=false;$("quote").replaceChildren();$("status").textContent="Reading your policy...";showAnswer();
+ const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...payload,document_ids:chosen()})});if(!r.ok){$("status").textContent="Please check the details and try again.";return}
+ const reader=r.body.pipeThrough(new TextDecoderStream()).getReader();let buf="";for(;;){const{value,done}=await reader.read();if(done)break;buf+=value;const parts=buf.split("\n\n");buf=parts.pop();
+ for(const p of parts){const data=p.split("\n").find(l=>l.startsWith("data: "));if(!data)continue;const ev=JSON.parse(data.slice(6));if(ev.type==="sources")ev.sources.forEach(s=>sources[s.id]=s);
+ if(ev.type==="search")$("status").textContent="Checking: "+ev.query;if(ev.type==="token"){text+=ev.text;showAnswer()}if(ev.type==="error")$("status").textContent=ev.message;if(ev.type==="done")$("status").textContent=""}}}
+$("send").onclick=()=>$("q").value.trim().length>1&&stream("/api/chat",{question:$("q").value.trim()});
+$("go").onclick=()=>$("treat").value.trim().length>2?stream("/api/claim-review",{claim_type:$("type").value,treatment:$("treat").value,amount:$("amount").value,policy_start:$("start").value,treatment_date:$("date").value,reason_given:$("reason").value,documents_sent:$("sent").value}):alert("Enter the treatment or illness.");
+for(const[t,show,hide,other]of[["tab-ask","ask","review","tab-review"],["tab-review","review","ask","tab-ask"]])$(t).onclick=()=>{$(show).hidden=false;$(hide).hidden=true;$(t).className="p";$(other).className=""};
+loadDocs();
+</script></body></html>
